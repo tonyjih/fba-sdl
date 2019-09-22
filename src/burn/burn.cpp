@@ -74,6 +74,7 @@ bool BurnCheckMMXSupport()
 
 extern "C" INT32 BurnLibInit()
 {
+	printf("BurnLibInit\n");
 	BurnLibExit();
 	nBurnDrvCount = sizeof(pDriver) / sizeof(pDriver[0]);	// count available drivers
 

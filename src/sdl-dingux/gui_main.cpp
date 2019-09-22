@@ -303,7 +303,7 @@ char ss_prg_credit(void)
 
 	put_string("CREDIT", 142, CREDIT_Y + 8, BLANC, credit);
 	put_string("Final Burn Alpha v" VERSION, CREDIT_X + 8, CREDIT_Y + 24, BLEU, credit);
-	put_string("for OpenDingux", CREDIT_X + 48, CREDIT_Y + 34, BLEU, credit);
+	put_string("for OpenDingux/RG350", CREDIT_X + 28, CREDIT_Y + 34, BLEU, credit);
 	put_string("Frontend is based on Capex", CREDIT_X + 8, CREDIT_Y + 54, VERT, credit);
 	put_string("by JyCet and Juanvvc", CREDIT_X + 32, CREDIT_Y + 64, VERT, credit);
 	put_string("Skin by HiBan", CREDIT_X + 56, CREDIT_Y + 88, VERT, credit);

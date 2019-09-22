@@ -304,17 +304,24 @@ void do_keypad()
 	sdl_input_read(true);
 
 	// process redefinable keypresses
-	if(options.rotate == 1 ) {
+	
+	if(options.rotate == 1 ) { //-90
 		if (keypad & KEYPAD_UP) FBA_KEYPAD[0] |= bVert ? KEYPAD_LEFT : KEYPAD_UP;
 		if (keypad & KEYPAD_DOWN) FBA_KEYPAD[0] |= bVert ? KEYPAD_RIGHT : KEYPAD_DOWN;
 		if (keypad & KEYPAD_LEFT) FBA_KEYPAD[0] |= bVert ? KEYPAD_DOWN : KEYPAD_LEFT;
 		if (keypad & KEYPAD_RIGHT) FBA_KEYPAD[0] |= bVert ? KEYPAD_UP : KEYPAD_RIGHT;
 	}
-	else if(options.rotate == 2) {
+	else if(options.rotate == 2) {//-180
 		if (keypad & KEYPAD_LEFT) FBA_KEYPAD[0] |=  KEYPAD_UP;
 		if (keypad & KEYPAD_RIGHT) FBA_KEYPAD[0] |= KEYPAD_DOWN;
 		if (keypad & KEYPAD_DOWN) FBA_KEYPAD[0] |=  KEYPAD_LEFT;
 		if (keypad & KEYPAD_UP) FBA_KEYPAD[0] |=  KEYPAD_RIGHT;
+	}
+	else {
+		if (keypad & KEYPAD_UP) FBA_KEYPAD[0] |= bVert ? KEYPAD_LEFT : KEYPAD_UP;
+		if (keypad & KEYPAD_DOWN) FBA_KEYPAD[0] |= bVert ? KEYPAD_RIGHT : KEYPAD_DOWN;
+		if (keypad & KEYPAD_LEFT) FBA_KEYPAD[0] |= bVert ? KEYPAD_DOWN : KEYPAD_LEFT;
+		if (keypad & KEYPAD_RIGHT) FBA_KEYPAD[0] |= bVert ? KEYPAD_UP : KEYPAD_RIGHT;
 	}
 
 	if (keypad & KEYPAD_COIN) FBA_KEYPAD[0] |= KEYPAD_COIN;
