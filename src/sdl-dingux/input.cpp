@@ -31,7 +31,7 @@ struct DIPInfo{
 // Mapping of PC inputs to game inputs
 struct GameInput GameInput[4][MAX_INPUT_inp];
 unsigned int nGameInpCount = 0;
-static bool bInputOk = false;
+bool bInputOk = false;
 unsigned char *ServiceDip = 0;
 unsigned char *P1Start = 0;
 unsigned char *P2Start = 0;
@@ -457,7 +457,7 @@ void InpDIP()
 	bool bDifficultyFound = false;
 	while (BurnDrvGetDIPInfo(&bdi, i) == 0) {
 
-		//printf("%2d. %02x '%s'\n", bdi.nInput, bdi.nFlags, bdi.szText);
+		printf("%2d. %02x '%s'\n", bdi.nInput, bdi.nFlags, bdi.szText);
 
 		if (bdi.nFlags == 0xFF) {
 			pgi = DIPInfo.DIPData + (bdi.nInput + nDIPOffset - DIPInfo.nFirstDIP);

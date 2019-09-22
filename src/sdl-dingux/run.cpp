@@ -11,12 +11,12 @@
 #include "sdl_input.h"
 
 extern unsigned int FBA_KEYPAD[4]; // sdlinput.cpp
-
+extern SDL_Surface *screen; //sdl_video.cpp//
 bool bShowFPS = false;
 bool bPauseOn = false;
 
-int InpMake(unsigned int[]);
-
+extern int InpMake(unsigned int[]);
+extern bool bInputOk;
 void VideoTrans();
 
 int RunReset()
@@ -52,10 +52,13 @@ int RunOneFrame(bool bDraw, int fps)
 			if (bShowFPS)
 			{
 				char buf[11];
+				char screenInfo[200];
 				int x;
 				sprintf(buf, "FPS: %2d/%2d", fps,(nBurnFPS/100));
+				sprintf(screenInfo, "screen:%d,%d game:%d,%d,inputok:%s",screen->w,screen->h,VideoBufferWidth,VideoBufferHeight, bInputOk?"yes":"no");
 				DrawRect((uint16 *) (unsigned short *) &VideoBuffer[0],0, 0, 60, 9, 0,PhysicalBufferWidth);
 				DrawString (buf, (unsigned short *) &VideoBuffer[0], 0, 0,PhysicalBufferWidth);
+				DrawString (screenInfo, (unsigned short *) &VideoBuffer[0], 70, 0,PhysicalBufferWidth);
 			}
 
 			VideoFlip();

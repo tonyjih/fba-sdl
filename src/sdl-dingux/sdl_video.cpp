@@ -354,7 +354,23 @@ static void Blit_448x224_to_320x240()
 			q += 7;
 		}
 }
-
+static void Blitf_448x224_to_320x240() {
+	// IGS 448x224 flip
+	unsigned short * p = &VideoBuffer[2560];
+	unsigned short * q = BurnVideoBuffer + 448 * 224 - 1 - 7;
+	
+	for (int i=0; i<224; i++) {
+		for (int j=0; j<64; j++) {
+			p[0] = COLORMIX(q[7], q[6]);
+			p[1] = q[5];
+			p[2] = COLORMIX(q[4], q[3]);
+			p[3] = q[2];
+			p[4] = COLORMIX(q[1], q[0]);
+			p += 5;
+			q -= 7;
+		}
+	}
+}
 static void Blitr_448x224_to_320x240()
 {
 	// 448x224 rotate to 192x240
@@ -1721,10 +1737,20 @@ static void Blitf()
 		p += screen->w - VideoBufferWidth;
 	}
 }
+static void Blitrll() //rotate left two times
+{
+	register unsigned short *p = &VideoBuffer[p_offset];
+	register unsigned short *q = &BurnVideoBuffer[q_offset];
+	for(int y = VideoBufferHeight; y--;) {
+		for(int x = VideoBufferWidth; x--;)
+			*p++ = *q--;
+		p += screen->w - VideoBufferWidth;
+	}
+}
 
 static unsigned int r_offset = 0;
 
-static void Blitr()
+static void Blitrl() //rotate left 
 {
 	unsigned short * p = &VideoBuffer[p_offset];
 	unsigned short * q = BurnVideoBuffer;
@@ -1742,6 +1768,7 @@ static void Blitr()
 		p += r_offset;
 	}
 }
+
 
 static void Blitrf()
 {
@@ -1779,7 +1806,7 @@ BLIT_TABLE blit_table[] = {
 	{320, 240, 640, 224, Blit_640x224_to_320x240, Blit_640x224_to_320x240,  Blit_640x224_to_320x240,  Blit_640x224_to_320x240  }, // Taito (darius2d)
 	{320, 240, 512, 256, Blit_512x256_to_320x240, Blitf_512x256_to_320x240, Blitr_512x256_to_320x240, Blitrf_512x256_to_320x240}, // Konami (hexion)
 	{320, 240, 512, 224, Blit_512x224_to_320x240, Blitf_512x224_to_320x240, Blitr_512x224_to_320x240, Blitrf_512x224_to_320x240}, // hotpinbl
-	{320, 240, 448, 224, Blit_448x224_to_320x240, Blit_448x224_to_320x240,  Blitr_448x224_to_320x240, Blitr_448x224_to_320x240 }, // IGS (PGM)
+	{320, 240, 448, 224, Blit_448x224_to_320x240, Blitf_448x224_to_320x240,  Blitr_448x224_to_320x240, Blitr_448x224_to_320x240 }, // IGS (PGM)
 	{320, 240, 384, 256, Blit_384x256_to_320x240, Blit_384x256_to_320x240,  Blitr_384x256_to_320x240, Blitr_384x256_to_320x240 }, // Irem
 	{320, 240, 384, 240, Blit_384x240_to_320x240, Blitf_384x240_to_320x240, Blitr_384x240_to_320x240, Blitrf_384x240_to_320x240}, // Cave, Capcom
 	{320, 240, 384, 224, Blit_384x224_to_320x240, Blitf_384x224_to_320x240, Blitr_384x224_to_320x240, Blitrf_384x224_to_320x240}, // CPS1 & CPS2, Seta
@@ -1788,7 +1815,7 @@ BLIT_TABLE blit_table[] = {
 	{320, 240, 368, 224, Blit_368x224_to_320x240, Blit_368x224_to_320x240,  Blit_368x224_to_320x240,  Blit_368x224_to_320x240  }, // zerozone
 	{320, 240, 352, 240, Blit_352x240_to_320x240, Blit_352x240_to_320x240,  Blitr_352x240_to_320x240, Blitr_352x240_to_320x240 }, // V-System (srumbler)
 	{320, 240, 336, 240, Blit_336x240_to_320x240, Blit_336x240_to_320x240,  Blit_336x240_to_320x240,  Blit_336x240_to_320x240  }, // Atari
-	{320, 240, 320, 240, Blit_320x240_to_320x240, Blit_320x240_to_320x240,  Blitr_320x240_to_320x240, Blitrf_320x240_to_320x240}, // Cave & Toaplan
+	{320, 240, 320, 240, Blit_320x240_to_320x240, Blitf,  Blitr_320x240_to_320x240, Blitrf_320x240_to_320x240}, // Cave & Toaplan
 	{320, 240, 320, 224, Blit,                    Blitf,                    Blitr_320x224_to_320x240, Blitrf_320x224_to_320x240}, // Psykio, Sega
 	{320, 240, 304, 224, Blit,                    Blitf,                    Blitr_304x224_to_320x240, Blitrf_304x224_to_320x240}, // Konami (devstors)
 	{320, 240, 288, 224, Blit,                    Blitf,                    Blitr_288x224_to_320x240, Blitrf_288x224_to_320x240}, // Pacman, Konami
@@ -1880,39 +1907,49 @@ int VideoInit()
 	memset(BurnVideoBuffer, 0, VideoBufferWidth * VideoBufferHeight * 2);
 	BurnerVideoTrans = Blit_320x240_to_320x240; // default blit
 
-	bool bVertical = options.rotate && (BurnDrvGetFlags() & BDF_ORIENTATION_VERTICAL);
+	bool bRotate = options.rotate && (BurnDrvGetFlags() & BDF_ORIENTATION_VERTICAL);
 
 	// if source buffer < screen buffer then set general blitting routine with centering if needed
-	if(!bVertical && VideoBufferWidth <= screen->w && VideoBufferHeight <= screen->h) {
+	if(!bRotate && VideoBufferWidth <= screen->w && VideoBufferHeight <= screen->h) {
 		if(BurnDrvGetFlags() & BDF_ORIENTATION_FLIPPED)
 			BurnerVideoTrans = Blitf;
 		else
 			BurnerVideoTrans = Blit;
-	} else if(bVertical && VideoBufferWidth <= screen->h && VideoBufferHeight <= screen->w) {
+	} else if(bRotate && VideoBufferWidth <= screen->h && VideoBufferHeight <= screen->w) {
 		if(BurnDrvGetFlags() & BDF_ORIENTATION_FLIPPED)
 			BurnerVideoTrans = Blitrf;
 		else
-			BurnerVideoTrans = Blitr;
+			BurnerVideoTrans = Blitrl;
 	} else {
 		// if source buffer is bigger than screen buffer then find an appropriate downscaler
+		
+	
 		for(int i = 0; blit_table[i].dst_w != 0; i++) {
 			if(blit_table[i].dst_w == screen->w && blit_table[i].dst_h == screen->h &&
-			   blit_table[i].src_w == VideoBufferWidth && blit_table[i].src_h == VideoBufferHeight) {
-				if (bVertical && (BurnDrvGetFlags() & BDF_ORIENTATION_FLIPPED))
+			blit_table[i].src_w == VideoBufferWidth && blit_table[i].src_h == VideoBufferHeight) {
+				if(bRotate && (BurnDrvGetFlags() & BDF_ORIENTATION_FLIPPED)) 
 					BurnerVideoTrans = blit_table[i].blitrf;
 				else if (BurnDrvGetFlags() & BDF_ORIENTATION_FLIPPED)
 					BurnerVideoTrans = blit_table[i].blitf;
-				else if (bVertical)
-					BurnerVideoTrans = blit_table[i].blitr;
-				else
+				else if (bRotate)
+					//rotate -180
+					if(options.rotate == 2) {
+						BurnerVideoTrans = blit_table[i].blitf;
+					}
+					else {
+						BurnerVideoTrans = blit_table[i].blitr;
+					}
+				else {
 					BurnerVideoTrans = blit_table[i].blit;
+				}
 				break;
 			}
 		}
+		
 	}
 
-	if (BurnerVideoTrans == Blit || BurnerVideoTrans == Blitf || BurnerVideoTrans == Blitr || BurnerVideoTrans == Blitrf) {
-		if (bVertical) {
+	if (BurnerVideoTrans == Blit || BurnerVideoTrans == Blitf || BurnerVideoTrans == Blitrll || BurnerVideoTrans == Blitrl || BurnerVideoTrans == Blitrf) {
+		if (bRotate && (options.rotate == 1 || options.rotate == 3) ) {
 			p_offset = ((screen->h - VideoBufferWidth)/2)*screen->w;
 			r_offset = screen->w - VideoBufferHeight;
 		}
