@@ -17,15 +17,26 @@ char szAppBlendPath[MAX_PATH] = "./.fba/blend"; 	// for cps_obj.cpp, neo_sprite.
 
 void BurnPathsInit()
 {
+	printf("BurnPathsInit\n");
 #ifndef WIN32
 	char *home = getenv("HOME");
 	if(home) sprintf(szAppHomePath, "%s/.fba", home);
-	mkdir(szAppHomePath, 0777);
-	if(!errno) {
-		getcwd(szAppHomePath, MAX_PATH);
-		strcat(szAppHomePath, "/.fba");
-		mkdir(szAppHomePath, 0777);
+	printf("set szAppHomePath:%s\n",szAppHomePath);
+	if(access(szAppHomePath,0) == 0) {//exists
+		printf("dir exists!\n");
 	}
+	else {
+		printf("dir not exists,will create!\n");
+		int status = mkdir(szAppHomePath, 0777);
+		if(status == -1) {
+			printf("error when mkdir:%d\n",errno);
+			getcwd(szAppHomePath, MAX_PATH);
+			strcat(szAppHomePath, "/.fba");
+			mkdir(szAppHomePath, 0777);
+			printf("set szAppHomePath:%s\n",szAppHomePath);
+		}
+	}
+	
 
 	sprintf(szAppSavePath, "%s/saves", szAppHomePath);
 	mkdir(szAppSavePath, 0777);
